@@ -53,10 +53,12 @@ similar with Apriori algorithm.
 3. Find unique 1-word-items from transactions and create an item set array
 4. Divide item set into chunks and multiprocess each chunk to find frequency
 5. To find frequency add ' ' char to the beginning and end of both item and transaction. It will provide
-us to check whether the item is a subset of transaction. (e.g item = ' make america '
-transaction = ' make america great again '.) If we do not add white spaces, then the algorithm may over count
-some different patterns such as item = 'a book' transaction = 'America book' then there will be a false match.
-Instead of n-gram, I prefer this technique to save memory space.
+us to check whether the item is a subset of transaction. If we do not add white spaces, then the algorithm may increase
+the frequency of items falsely. For example let's say (item = 'a book') and
+ (transaction = 'america book'), then (item = 'a book') will be a substring of (transaction = 'america book') which is not
+ desirable. If we add white
+ spaces, then there will not be false matches. Also, even though this problem can be solved with n-gram,
+  I prefer this technique to save memory space.
 6. Filter items from item set that their frequency value is less than the minimum support (multi processing)
 7. Generate candidate n+1 word sequences set by combining filtered n word sequences and filtered 1-word-item set
 8. Find frequency of candidate set (same multi processing technique as step 4)
