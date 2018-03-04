@@ -42,6 +42,9 @@ python sequential_words_analyser_apriori.py -f TrumpTweets.txt
  -s 0.02 -n 6
 ```
 ## Algorithm Steps
+Generalized Sequential Pattern algorithm is used to analyze
+frequent word-sequences. The algorithm is very
+similar with Apriori algorithm.
 
 1. Read transactions from input file line by line
 2. Create variable n and set n = 1 which stands for the n word sequences
@@ -63,8 +66,8 @@ Instead of n-gram, I prefer this technique to save memory space.
 
 ## Output
 
-*The algorithm prints the top N most frequent word-sequences.
-*It also visualise the most frequent word-sequences in 'most_freq_words_n.jpg' files.
+* The algorithm prints the top N most frequent word-sequences.
+* It also visualise the most frequent word-sequences in 'most_freq_words_n.jpg' files.
 N symbolise the number of words in sequence. E.G if you open most_freq_words_4.jpg file
 you will see that the most frequent sequence is 'make america great again'.
 
