@@ -30,10 +30,11 @@ Each line symbolises one transaction and the words stand for the items.
 python sequential_words_analyser_apriori.py -f DATASET -s minSupport -n topNMostFreqSequences
 ```
 * DATASET: Input data where there are transactions
-* minSupport: optional parameter and default value is
- 0.02. It is the minimum support value for Apriori algorithm <br />
-* topNmostFreqSequences: optional parameter and default value is 5. The parameter will
-print the top N most frequent word sequences.
+* minSupport: Minimum support percentage value for Apriori algorithm. Default value is 0.02 and it can have any value
+between 0 and 1
+ 0.02.  <br />
+* topNmostFreqSequences: The parameter will
+print the top N most frequent word sequences. It is optional and default value is 5
 <br />
 
 Example script for TrumpTweets data:
