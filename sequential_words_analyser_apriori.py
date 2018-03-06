@@ -4,7 +4,7 @@ Description     : Python implementation of the Apriori Algorithm to Analyze freq
 Usage:
     $python apriori.py -f DATASET -s minSupport -n topNMostFreqSequences
 
-    $python apriori.py -f DATASET -s 0.15 -n 6
+    $python sequential_words_analyser_apriori.py -f TrumpTweets.txt -s 0.02 -n 6
 """
 
 import sys
@@ -18,6 +18,7 @@ from optparse import OptionParser
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from time import time
+
 
 def Counter(itemSet, transactionList):
     """
@@ -127,19 +128,42 @@ def returnItemsWithMinSupport(itemSet, transactionList, numberOfTransactions):
     return _freqSet, itemSetWithMinSupport
 
 
-def joinSet(itemSet, currentLSet):
+def joinSet(k, currentLSet):
     """
-       The method takes cartesian product of itemSet and currentLSet.
+       The method finds candidate set by using currentLSet. If k parameter is 2 then it means that 2 words-candidate set
+       will be generated. To create 2 words-candidate set take cartesian product of 1-word candidate set. If it is more
+       than 2, then apply candidate generation algorithm of GSP algorithm (refer to README)
        Input:
-        - itemSet: list that includes all unique words in the input file (only one word per item).
-                    e.g = ['liar', 'execut', 'forget']
+        - k: # of word sequence if k = 2 create 2 word candidate set
         - currentLSet: list that has all the filtered current state items with minimum support. The number of words per
                        item in this list may change between 1 to N depending on minimum support value
                        e.g (2 words per item) = ['make america', 'great again']
        Return:
         - the combination of itemSet and currentLSet
     """
-    return map(' '.join, itertools.chain(itertools.product(currentLSet, itemSet)))
+    candidateSet = list()
+    if k - 1 == 1:
+        candidateSet = map(' '.join, itertools.chain(itertools.product(currentLSet, currentLSet)))
+    else:
+        first_dict = defaultdict(list)
+        last_dict = defaultdict(list)
+
+        for word_sequence in currentLSet:
+            last = word_sequence.split(' ', 1)[1]  # Delete first word
+            first = word_sequence.rsplit(' ', 1)[0]  # Delete last word
+            first_dict[first].append(word_sequence)
+            last_dict[last].append(word_sequence)
+
+        keys_first = set(first_dict.keys())
+        keys_last = set(last_dict.keys())
+        intersection = keys_first & keys_last  # '&' operator is used for set intersection
+
+        for key in intersection:
+            for last_word in last_dict[key]:
+                for first_word in first_dict[key]:
+                    candidate = last_word + ' ' + first_word.split(' ')[-1]
+                    candidateSet.append(candidate)
+    return candidateSet
 
 
 def getItemSetTransactionList(data_iterator):
@@ -178,22 +202,22 @@ def runApriori(data_iter):
     """
     itemSet, transactionList = getItemSetTransactionList(data_iter)
     freqSet = defaultdict(int)
-    largeSet = dict() # Dictionary which stores (key=n-itemSets,value=support)
-    numberOfTransactions = len(transactionList) # Calculate number of tweets or transactions
+    largeSet = dict()  # Dictionary which stores (key=n-itemSets,value=support)
+    numberOfTransactions = len(transactionList)  # Calculate number of tweets or transactions
 
     print('There are %s transactions.' % numberOfTransactions)
     localFreqSet, oneCSet = returnItemsWithMinSupport(itemSet, transactionList, numberOfTransactions)
 
     currentLSet = oneCSet
-    k = 2 # k-itemSets or k-word sequences
+    k = 2  # k-itemSets or k-word sequences
     while currentLSet:
+        print('%s word combinations is in progress..' % k)
         freqSet[k - 1] = localFreqSet
         largeSet[k - 1] = currentLSet
-        currentLSet = joinSet(oneCSet, currentLSet)
+        currentLSet = joinSet(k, currentLSet)
         localFreqSet, currentCSet = returnItemsWithMinSupport(currentLSet,
                                                               transactionList, numberOfTransactions)
         currentLSet = currentCSet
-        print('%s word combinations is in progress..' % k)
         k += 1
 
     return largeSet, freqSet, k - 1
@@ -220,18 +244,21 @@ def dataFromFile(fname):
     for line in file_iter:
         yield line
 
+
 def printResults(freqs, K, N):
     """
         Print top N most frequent K-word sequences
     """
-
     for k in range(1, K):
         print('#####################################')
         print('The most frequent %s-word substrings:' % k)
         print('#####################################')
         sortedFreq = sorted(((value, key) for (key, value) in freqs[k].items()), reverse=True)
         for i in range(N):
-            print ('%s : %s' % (sortedFreq[i][1], sortedFreq[i][0]))
+            try:
+                print ('%s : %s' % (sortedFreq[i][1], sortedFreq[i][0]))
+            except:
+                pass
 
 
 if __name__ == "__main__":
@@ -263,6 +290,9 @@ if __name__ == "__main__":
             sys.exit('System will exit')
 
     minSupport = options.minS
+    # inFile = dataFromFile('TrumpTweets.txt')
+    # topN = 5
+    # minSupport = 0.02
     start_time = time()
     items, freqs, k = runApriori(inFile)
     elapsed_time = time() - start_time
@@ -272,4 +302,3 @@ if __name__ == "__main__":
     elapsed_time = time() - start_time
     print('Most Frequent Word Visualisation running time: %s' % elapsed_time)
     printResults(freqs, k, options.topN)
-

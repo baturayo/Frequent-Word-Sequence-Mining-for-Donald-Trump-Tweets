@@ -61,7 +61,19 @@ the frequency of items falsely. For example let's say (item = 'a book') and
  spaces, then there will not be false matches. Also, even though this problem can be solved with n-gram,
   I prefer this technique to save memory space.
 6. Filter items from item set that their frequency value is less than the minimum support (multi processing)
-7. Generate candidate n+1 word sequences set by combining filtered n word sequences and filtered 1-word-item set
+7.
+    1. If n == 2, generate candidate 2-word sequences set by taking cartesian product of filtered 1-word-item set
+    2. Else
+        * Name (n-1) word-sequences set as SuperSet
+        * Delete first word of each Superset element and save it as key in Dictionary A and save Superset element to the
+        value of key.
+        * Delete the last word of each Superset element and save it as key in Dictionary B and save Superset element to the
+        value of key.
+        * Take the intersection of keys of A and B
+        * Iterate over the intersected elements of Dictionary A and Dictionary B,
+        create a candidate by merging the values of A and the last words of the values of B
+        * Collect all the candidates and return a candidate set
+
 8. Find frequency of candidate set (same multi processing technique as step 4)
 9. Filter candidate set based on minimum support value (multi process)
 10. n += 1
